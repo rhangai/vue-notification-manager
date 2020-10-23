@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"strict": true,
+		"module": "es2015",
+		"moduleResolution": "node",
+		"target": "es2018",
+		"lib": ["es2018", "dom"],
+		"experimentalDecorators": true,
+		"esModuleInterop": true,
+		"types": ["@types/jest", "@types/vuelidate"],
+		"baseUrl": "."
+	},
+	"exclude": ["dist/**/*", "lib/**/*"]
+}

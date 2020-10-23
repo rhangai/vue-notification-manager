@@ -1,0 +1,13 @@
+# Temp
+.\#*
+\#*
+*~
+~*
+
+# Build files
+/lib
+/dist
+/coverage
+
+# Vendor
+node_modules
