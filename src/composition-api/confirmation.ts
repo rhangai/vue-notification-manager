@@ -1,5 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { InjectionKey, provide, inject, ref, reactive, nextTick } from "@vue/composition-api";
+import { InjectionKey, Ref, provide, inject, ref, reactive, nextTick } from "@vue/composition-api";
+import { Confirmation } from "@rhangai/vue-notification-manager/lib/types";
 import { ConfirmationBase, ConfirmationManager } from "../confirmation";
 
 const CONFIRMATION_KEY: InjectionKey<ConfirmationManager> = "confirmation-manager" as any;
@@ -8,24 +9,28 @@ export type ConfirmationHandlerOptions = {
 	delay?: number;
 };
 
-export type ConfirmationItem<Confirmation extends ConfirmationBase = ConfirmationBase> = {
+export type ConfirmationItem<C extends ConfirmationBase = Confirmation> = {
 	id: number;
 	active: boolean;
-	confirmation: Confirmation;
+	confirmation: C;
 	resolve: (value: boolean) => void;
 };
 
-export function useConfirmationHandler<Confirmation extends ConfirmationBase = ConfirmationBase>(
+export type UseConfirmationHandlerResult<C extends ConfirmationBase = Confirmation> = {
+	confirmations: Ref<ConfirmationItem<C>[]>;
+};
+
+export function useConfirmationHandler<C extends ConfirmationBase = Confirmation>(
 	options: ConfirmationHandlerOptions = {}
-) {
+): UseConfirmationHandlerResult<C> {
 	let idCounter = 0;
 
-	const confirmations = ref<ConfirmationItem<Confirmation>[]>([]);
+	const confirmations = ref<ConfirmationItem<C>[]>([]);
 	const confirmationCallback = (confirmation: ConfirmationBase) => {
 		return new Promise<boolean>((resolve) => {
 			// eslint-disable-next-line no-plusplus
 			const currentId = idCounter++;
-			let item: ConfirmationItem<Confirmation>;
+			let item: ConfirmationItem<C>;
 			let resolved: boolean = false;
 
 			const removeConfirmation = () => {
@@ -56,15 +61,19 @@ export function useConfirmationHandler<Confirmation extends ConfirmationBase = C
 			});
 		});
 	};
-	const confirmationManager = new ConfirmationManager<Confirmation>(confirmationCallback);
+	const confirmationManager = new ConfirmationManager<C>(confirmationCallback);
 	confirmationManager.confirm = confirmationManager.confirm.bind(confirmationManager);
 	provide(CONFIRMATION_KEY, confirmationManager);
 	return {
-		confirmations,
+		confirmations: confirmations as any,
 	};
 }
 
-export function useConfirm() {
+export type UseConfirmResult<C extends ConfirmationBase = Confirmation> = {
+	confirm: (confirmationValue?: null | string | C) => Promise<boolean>;
+};
+
+export function useConfirm<C extends ConfirmationBase = Confirmation>(): UseConfirmResult<C> {
 	const confirmationManager = inject(CONFIRMATION_KEY);
 	if (!confirmationManager) throw new Error(`Confirmation manager not provided.`);
 	return { confirm: confirmationManager.confirm };

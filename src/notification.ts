@@ -1,3 +1,5 @@
+import { Notification } from "@rhangai/vue-notification-manager/lib/types";
+
 export type NotificationBase = {
 	message?: string;
 	[key: string]: any;
@@ -5,10 +7,10 @@ export type NotificationBase = {
 
 type NotificationCallback = (notification: NotificationBase) => void;
 
-export class NotificationManager<Notification extends NotificationBase = NotificationBase> {
+export class NotificationManager<N extends NotificationBase = Notification> {
 	constructor(private readonly notificationCallback: NotificationCallback) {}
 
-	notify(notificationValue: string | Notification) {
+	notify(notificationValue: string | N) {
 		if (!this.notificationCallback) return true;
 		let notification: NotificationBase;
 		if (typeof notificationValue === "string") {
