@@ -1,5 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { InjectionKey, provide, inject, ref, reactive, nextTick } from "@vue/composition-api";
+import { Notification } from "@rhangai/vue-notification-manager/lib/types";
 import { NotificationBase, NotificationManager } from "../notification";
 
 const NOTIFICATION_KEY: InjectionKey<NotificationManager> = "notification-manager" as any;
@@ -8,18 +9,18 @@ export type NotificationHandlerOptions = {
 	delay?: number;
 };
 
-export type NotificationItem<Notification extends NotificationBase = NotificationBase> = {
+export type NotificationItem<N extends NotificationBase = Notification> = {
 	id: number;
 	active: boolean;
-	notification: Notification;
+	notification: N;
 	resolve: () => void;
 };
 
-export function useNotificationHandler<Notification extends NotificationBase = NotificationBase>(
+export function useNotificationHandler<N extends NotificationBase = Notification>(
 	options: NotificationHandlerOptions = {}
 ) {
 	let idCounter = 0;
-	const notifications = ref<NotificationItem<Notification>[]>([]);
+	const notifications = ref<NotificationItem<N>[]>([]);
 	const notificationCallback = (notification: NotificationBase) => {
 		// eslint-disable-next-line no-plusplus
 		const currentId = idCounter++;
@@ -52,16 +53,18 @@ export function useNotificationHandler<Notification extends NotificationBase = N
 			item.active = true;
 		});
 	};
-	const notificationManager = new NotificationManager<Notification>(notificationCallback);
+	const notificationManager = new NotificationManager<N>(notificationCallback);
 	notificationManager.notify = notificationManager.notify.bind(notificationManager);
 	provide(NOTIFICATION_KEY, notificationManager);
 	return {
+		notify: notificationManager.notify,
 		notifications,
 	};
 }
 
 export function useNotify() {
 	const notificationManager = inject(NOTIFICATION_KEY);
-	if (!notificationManager) throw new Error(`Notification manager not provided.`);
+	if (!notificationManager)
+		throw new Error(`Notification manager not provided. Try "useNotificationHandler()".`);
 	return { notify: notificationManager.notify };
 }

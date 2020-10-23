@@ -17,7 +17,8 @@ export type ConfirmationItem<C extends ConfirmationBase = Confirmation> = {
 };
 
 export type UseConfirmationHandlerResult<C extends ConfirmationBase = Confirmation> = {
-	confirmations: Ref<ConfirmationItem<C>[]>;
+	confirm: (confirmationValue?: null | string | C) => Promise<boolean>;
+	confirmations: Readonly<Ref<Readonly<ConfirmationItem<C>>[]>>;
 };
 
 export function useConfirmationHandler<C extends ConfirmationBase = Confirmation>(
@@ -65,6 +66,7 @@ export function useConfirmationHandler<C extends ConfirmationBase = Confirmation
 	confirmationManager.confirm = confirmationManager.confirm.bind(confirmationManager);
 	provide(CONFIRMATION_KEY, confirmationManager);
 	return {
+		confirm: confirmationManager.confirm,
 		confirmations: confirmations as any,
 	};
 }
@@ -75,6 +77,7 @@ export type UseConfirmResult<C extends ConfirmationBase = Confirmation> = {
 
 export function useConfirm<C extends ConfirmationBase = Confirmation>(): UseConfirmResult<C> {
 	const confirmationManager = inject(CONFIRMATION_KEY);
-	if (!confirmationManager) throw new Error(`Confirmation manager not provided.`);
+	if (!confirmationManager)
+		throw new Error(`ConfirmationManager not provided. Try useConfirmationHandler().`);
 	return { confirm: confirmationManager.confirm };
 }
