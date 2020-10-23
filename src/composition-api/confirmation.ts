@@ -66,6 +66,6 @@ export function useConfirmationHandler<Confirmation extends ConfirmationBase = C
 
 export function useConfirm() {
 	const confirmationManager = inject(CONFIRMATION_KEY);
-	if (!confirmationManager) throw new Error(`Confirmation manager not injected`);
+	if (!confirmationManager) throw new Error(`Confirmation manager not provided.`);
 	return { confirm: confirmationManager.confirm };
 }

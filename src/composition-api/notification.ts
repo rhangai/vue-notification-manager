@@ -62,6 +62,6 @@ export function useNotificationHandler<Notification extends NotificationBase = N
 
 export function useNotify() {
 	const notificationManager = inject(NOTIFICATION_KEY);
-	if (!notificationManager) throw new Error(`Notification manager not injected`);
+	if (!notificationManager) throw new Error(`Notification manager not provided.`);
 	return { notify: notificationManager.notify };
 }
