@@ -4,6 +4,10 @@ import { ConfirmationBase, ConfirmationManager } from "../confirmation";
 
 const CONFIRMATION_KEY: InjectionKey<ConfirmationManager> = "confirmation-manager" as any;
 
+export type ConfirmationHandlerOptions = {
+	delay?: number;
+};
+
 export type ConfirmationItem<Confirmation extends ConfirmationBase = ConfirmationBase> = {
 	id: number;
 	active: boolean;
@@ -11,7 +15,9 @@ export type ConfirmationItem<Confirmation extends ConfirmationBase = Confirmatio
 	resolve: (value: boolean) => void;
 };
 
-export function useConfirmationHandler<Confirmation extends ConfirmationBase = ConfirmationBase>() {
+export function useConfirmationHandler<Confirmation extends ConfirmationBase = ConfirmationBase>(
+	options: ConfirmationHandlerOptions = {}
+) {
 	let idCounter = 0;
 
 	const confirmations = ref<ConfirmationItem<Confirmation>[]>([]);
@@ -20,6 +26,7 @@ export function useConfirmationHandler<Confirmation extends ConfirmationBase = C
 			// eslint-disable-next-line no-plusplus
 			const currentId = idCounter++;
 			let item: ConfirmationItem<Confirmation>;
+			let resolved: boolean = false;
 
 			const removeConfirmation = () => {
 				const index = confirmations.value.findIndex((c) => c.id === currentId);
@@ -29,9 +36,11 @@ export function useConfirmationHandler<Confirmation extends ConfirmationBase = C
 			};
 
 			const resolveConfirmation = (value: boolean) => {
+				if (resolved) return;
+				resolved = true;
 				resolve(!!value);
 				item.active = false;
-				removeConfirmation();
+				setTimeout(removeConfirmation, options.delay ?? 0);
 			};
 
 			item = reactive({

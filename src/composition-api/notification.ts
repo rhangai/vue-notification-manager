@@ -4,6 +4,10 @@ import { NotificationBase, NotificationManager } from "../notification";
 
 const NOTIFICATION_KEY: InjectionKey<NotificationManager> = "notification-manager" as any;
 
+export type NotificationHandlerOptions = {
+	delay?: number;
+};
+
 export type NotificationItem<Notification extends NotificationBase = NotificationBase> = {
 	id: number;
 	active: boolean;
@@ -11,13 +15,16 @@ export type NotificationItem<Notification extends NotificationBase = Notificatio
 	resolve: () => void;
 };
 
-export function useNotificationHandler<Notification extends NotificationBase = NotificationBase>() {
+export function useNotificationHandler<Notification extends NotificationBase = NotificationBase>(
+	options: NotificationHandlerOptions = {}
+) {
 	let idCounter = 0;
 	const notifications = ref<NotificationItem<Notification>[]>([]);
 	const notificationCallback = (notification: NotificationBase) => {
 		// eslint-disable-next-line no-plusplus
 		const currentId = idCounter++;
 		let item: NotificationItem<Notification>;
+		let resolved: boolean = false;
 
 		const removeNotification = () => {
 			const index = notifications.value.findIndex((c) => c.id === currentId);
@@ -27,8 +34,10 @@ export function useNotificationHandler<Notification extends NotificationBase = N
 		};
 
 		const resolveNotification = () => {
+			if (resolved) return;
+			resolved = true;
 			item.active = false;
-			removeNotification();
+			setTimeout(removeNotification, options.delay ?? 0);
 		};
 
 		item = reactive({
