@@ -1,6 +1,6 @@
 {
   "name": "@rhangai/vue-notification-manager",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Notification manager for vue",
   "repository": "git@github.com:rhangai/vue-notification-manager.git",
   "author": "rhangai <hangai.renan@gmail.com>",
